@@ -1,34 +1,95 @@
-const authorController = {}
+const authorController = {};
+const { Author } = require("../models");
 
-authorController.createAuthor =  (req, res) => {
-  // REcuperamos la info
-	console.log(req.body);
-	const name = req.body.name;
-	const nationality = req.body.nationality;
-	console.log(name);
-	console.log(nationality);
+authorController.create = async (req, res) => {
+   const { name, nationality } = req.body;
 
-  // Validar Info. Esto son solo ejemplos
-  if(!name) {
-    return res.status(400).json({
-      success: false,
-      message: "Name required",
-    });
-  }
+   try {
+      if (!name || !nationality) {
+         res.status(400).json({
+            success: true,
+            message: "Invalid name or nationality",
+         });
+         return;
+      }
 
-  // Si hace falta tratamos la info, esto son solo ejemplos
-  let newNationality = nationality.toLowerCase()
-  console.log(newNationality);
+      await Author.create({
+         name,
+         nationality,
+      });
 
-  // Atacar a la bd para crear el nuevo registro del author
-  
+      res.status(200).json({
+         success: true,
+         message: "Author created successfully",
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error creating author",
+         error: error.message,
+      });
+   }
+};
 
-	res.status(201).json({
-		success: true,
-		message: "Author created",
-	});
-}
+authorController.getAll = async (req, res) => {
+   const authors = await Author.findAll();
 
+   res.status(200).json({
+      success: true,
+      message: "Authors retreived successfully",
+      data: authors,
+   });
+};
 
+authorController.getById = async (req, res) => {
+   const authorId = req.params.id;
+
+   const author = await Author.findByPk(authorId);
+
+   if (!author) {
+      res.status(404).json({
+         success: true,
+         message: "Author not found",
+      });
+      return;
+   }
+
+   res.status(200).json({
+      success: true,
+      message: "Author retreived successfully",
+      data: author,
+   });
+};
+
+authorController.update = async (req, res) => {
+   const authorId = req.params.id;
+   const authorData = req.body;
+
+   await Author.update(authorData, {
+      where: {
+         id: authorId,
+      },
+   });
+
+   res.status(200).json({
+      success: true,
+      message: "Author updated successfully",
+   });
+};
+
+authorController.delete = async (req, res) => {
+   const authorId = req.params.id;
+
+   await Author.destroy({
+      where: {
+         id: authorId,
+      },
+   });
+
+   res.status(200).json({
+      success: true,
+      message: "Author deleted successfully",
+   });
+};
 
 module.exports = authorController;

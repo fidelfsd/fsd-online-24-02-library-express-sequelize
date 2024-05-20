@@ -1,5 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const sequelize = require("./database/db");
+
+const authorController = require("./controllers/authorController");
+const bookController = require("./controllers/bookController");
+
 dotenv.config();
 
 const app = express();
@@ -15,51 +20,30 @@ app.get("/api/healthy", (req, res) => {
    });
 });
 
-// CRUD DE AUTHORS
+// Author Endpoints
+app.post("/api/authors", authorController.create);
+app.get("/api/authors", authorController.getAll);
+app.get("/api/authors/:id", authorController.getById);
+app.put("/api/authors/:id", authorController.update);
+app.delete("/api/authors/:id", authorController.delete);
 
-// create
-app.post("/api/authors", async (req, res) => {
-   res.status(200).json({
-      success: true,
-      message: "Author created successfully",
+// Book Endpoints
+app.post("/api/books", bookController.create);
+app.get("/api/books", bookController.getAll);
+app.get("/api/books/:id", bookController.getById);
+app.put("/api/books/:id", bookController.update);
+app.delete("/api/books/:id", bookController.delete);
+
+sequelize
+   .authenticate()
+   .then(() => {
+      console.log("🛢️  Database authenticated");
+
+      // start the server
+      app.listen(PORT, () => {
+         console.log(`🚀 Server listening on port: ${PORT}`);
+      });
+   })
+   .catch(() => {
+      console.error("Error authenticating database");
    });
-});
-
-// get all
-app.get("/api/authors", async (req, res) => {
-   res.status(200).json({
-      success: true,
-      message: "Authors retreived successfully",
-   });
-});
-
-// get by id
-app.get("/api/authors/:id", async (req, res) => {
-   res.status(200).json({
-      success: true,
-      message: "Author retreived successfully",
-   });
-});
-
-// update
-app.put("/api/authors/:id", async (req, res) => {
-   res.status(200).json({
-      success: true,
-      message: "Author updated successfully",
-   });
-});
-
-// delete
-app.delete("/api/authors/:id", async (req, res) => {
-   res.status(200).json({
-      success: true,
-      message: "Author deleted successfully",
-   });
-});
-
-// CRUD DE BOOKS
-
-// server
-app.listen(PORT, () => {
-   console.log(`Server listening on port: ${PORT}`);
-});
