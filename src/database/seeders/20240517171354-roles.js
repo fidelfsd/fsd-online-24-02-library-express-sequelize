@@ -20,7 +20,7 @@ module.exports = {
             },
             {
                id: 3,
-               name: "client",
+               name: "user",
                createdAt: new Date(),
                updatedAt: new Date(),
             },
