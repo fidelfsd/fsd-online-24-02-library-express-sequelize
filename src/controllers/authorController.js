@@ -1,5 +1,5 @@
 const authorController = {};
-const { Author } = require("../models");
+const { Author, Book } = require("../models");
 
 authorController.create = async (req, res) => {
    const { name, nationality } = req.body;
@@ -32,49 +32,82 @@ authorController.create = async (req, res) => {
 };
 
 authorController.getAll = async (req, res) => {
-   const authors = await Author.findAll();
+   try {
+      const authors = await Author.findAll();
 
-   res.status(200).json({
-      success: true,
-      message: "Authors retreived successfully",
-      data: authors,
-   });
+      res.status(200).json({
+         success: true,
+         message: "Authors retreived successfully",
+         data: authors,
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error retreiving authors",
+         error: error.message,
+      });
+   }
 };
 
 authorController.getById = async (req, res) => {
    const authorId = req.params.id;
 
-   const author = await Author.findByPk(authorId);
-
-   if (!author) {
-      res.status(404).json({
-         success: true,
-         message: "Author not found",
+   try {
+      const author = await Author.findByPk(authorId, {
+         include: [
+            {
+               model: Book,
+               as: "books",
+               attributes: { exclude: ["createdAt", "updatedAt", "author_id"] },
+            },
+         ],
+         attributes: { exclude: ["createdAt", "updatedAt"] },
       });
-      return;
-   }
 
-   res.status(200).json({
-      success: true,
-      message: "Author retreived successfully",
-      data: author,
-   });
+      if (!author) {
+         res.status(404).json({
+            success: true,
+            message: "Author not found",
+         });
+         return;
+      }
+
+      res.status(200).json({
+         success: true,
+         message: "Author retreived successfully",
+         data: author,
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error retreiving author",
+         error: error.message,
+      });
+   }
 };
 
 authorController.update = async (req, res) => {
-   const authorId = req.params.id;
-   const authorData = req.body;
+   try {
+      const authorId = req.params.id;
+      const authorData = req.body;
 
-   await Author.update(authorData, {
-      where: {
-         id: authorId,
-      },
-   });
+      await Author.update(authorData, {
+         where: {
+            id: authorId,
+         },
+      });
 
-   res.status(200).json({
-      success: true,
-      message: "Author updated successfully",
-   });
+      res.status(200).json({
+         success: true,
+         message: "Author updated successfully",
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error updating author",
+         error: error.message,
+      });
+   }
 };
 
 authorController.delete = async (req, res) => {

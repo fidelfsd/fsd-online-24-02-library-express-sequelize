@@ -1,5 +1,5 @@
 const bookController = {};
-const { Book } = require("../models");
+const { Book, Author } = require("../models");
 
 bookController.create = async (req, res) => {
    const { title, gender, author_id } = req.body;
@@ -54,13 +54,22 @@ bookController.getById = async (req, res) => {
    const bookId = req.params.id;
 
    try {
-      const book = await Book.findByPk(bookId);
+      const book = await Book.findByPk(bookId, {
+         include: [
+            {
+               model: Author,
+               as: "author",
+               attributes: { exclude: ["createdAt", "updatedAt"] },
+            },
+         ],
+         attributes: { exclude: ["createdAt", "updatedAt", "author_id"] },
+      });
       if (!book) {
          res.status(404).json({
             success: true,
             message: "Book not found",
          });
-         return; 
+         return;
       }
 
       res.status(200).json({
