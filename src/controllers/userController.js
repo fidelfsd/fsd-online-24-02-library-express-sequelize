@@ -31,11 +31,10 @@ userController.getById = async (req, res) => {
       });
 
       if (!user) {
-         res.status(404).json({
+         return res.status(404).json({
             success: true,
             message: "User not found",
          });
-         return;
       }
 
       res.status(200).json({

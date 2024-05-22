@@ -6,11 +6,10 @@ bookController.create = async (req, res) => {
 
    try {
       if (!title || !gender || !author_id) {
-         res.status(400).json({
+         return res.status(400).json({
             success: true,
             message: "Invalid title, gender or author_id",
          });
-         return;
       }
 
       await Book.create({
@@ -65,11 +64,10 @@ bookController.getById = async (req, res) => {
          attributes: { exclude: ["createdAt", "updatedAt", "author_id"] },
       });
       if (!book) {
-         res.status(404).json({
+         return res.status(404).json({
             success: true,
             message: "Book not found",
          });
-         return;
       }
 
       res.status(200).json({
@@ -115,11 +113,18 @@ bookController.delete = async (req, res) => {
    const bookId = req.params.id;
 
    try {
-      await Book.destroy({
+      const deleteResult = await Book.destroy({
          where: {
             id: bookId,
          },
       });
+
+      if (deleteResult === 0) {
+         return res.status(404).json({
+            success: true,
+            message: "Book not found",
+         });
+      }
 
       res.status(200).json({
          success: true,

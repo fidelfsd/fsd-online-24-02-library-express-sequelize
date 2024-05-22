@@ -6,11 +6,10 @@ authorController.create = async (req, res) => {
 
    try {
       if (!name || !nationality) {
-         res.status(400).json({
+         return res.status(400).json({
             success: true,
             message: "Invalid name or nationality",
          });
-         return;
       }
 
       await Author.create({
@@ -65,11 +64,10 @@ authorController.getById = async (req, res) => {
       });
 
       if (!author) {
-         res.status(404).json({
+         return res.status(404).json({
             success: true,
             message: "Author not found",
          });
-         return;
       }
 
       res.status(200).json({
@@ -113,11 +111,18 @@ authorController.update = async (req, res) => {
 authorController.delete = async (req, res) => {
    const authorId = req.params.id;
 
-   await Author.destroy({
+   const deleteResult = await Author.destroy({
       where: {
          id: authorId,
       },
    });
+
+   if (deleteResult === 0) {
+      return res.status(404).json({
+         success: true,
+         message: "Author not found",
+      });
+   }
 
    res.status(200).json({
       success: true,
