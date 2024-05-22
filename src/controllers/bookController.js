@@ -1,5 +1,5 @@
-const bookController = {};
 const { Book, Author } = require("../models");
+const bookController = {};
 
 bookController.create = async (req, res) => {
    const { title, gender, author_id } = req.body;
