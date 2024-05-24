@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
        * The `models/index` file will call this method automatically.
        */
       static associate(models) {
-         
+         // La asociacion esta definida en User y Book
       }
    }
    FavoriteBook.init(
