@@ -203,7 +203,7 @@ userController.getLoansByUserId_version2 = async (req, res) => {
 
 userController.getUserFavoriteBooks = async (req, res) => {
    try {
-      const userId = 4;
+      const userId = req.tokenData.userId;
 
       // Using eager loading
       const user = await User.findByPk(userId, {
@@ -241,7 +241,7 @@ userController.getUserFavoriteBooks = async (req, res) => {
 
 userController.addFavoriteBookToUser = async (req, res) => {
    try {
-      const userId = 4;
+      const userId = req.tokenData.userId;
 
       const bookId = Number(req.body.bookId);
       const bookToAdd = await Book.findByPk(bookId);
@@ -329,7 +329,7 @@ userController.addFavoriteBookToUser_version2 = async (req, res) => {
 
 userController.removeFavoriteBookFromUser = async (req, res) => {
    try {
-      const userId = 4;
+      const userId = req.tokenData.userId;
       const bookId = Number(req.body.bookId);
 
       const bookToRemove = await Book.findByPk(bookId);
@@ -402,6 +402,115 @@ userController.removeFavoriteBookFromUser_version2 = async (req, res) => {
       res.status(500).json({
          success: false,
          message: "Error removing book from favorites",
+         error: error.message,
+      });
+   }
+};
+
+userController.getUserProfile = async (req, res) => {
+   const userId = req.tokenData.userId;
+
+   try {
+      const user = await User.findByPk(userId, {
+         attributes: { exclude: ["createdAt", "updatedAt", "password"] },
+      });
+
+      res.status(200).json({
+         success: true,
+         message: "User retreived successfully",
+         data: user,
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error retreinving user",
+         error: error.message,
+      });
+   }
+};
+
+userController.updateUserProfile = async (req, res) => {
+   const userId = req.tokenData.userId;
+   const { password, role_id, ...restUserData } = req.body;
+
+   try {
+      const userToUpdate = await User.findByPk(userId);
+
+      if (!userToUpdate) {
+         return res.status(404).json({
+            success: true,
+            message: "User not found",
+         });
+      }
+
+      if (password) {
+         const hashedPassword = bcrypt.hashSync(password, 10);
+         userToUpdate.password = hashedPassword;
+      }
+
+      userToUpdate.set({
+         ...userToUpdate,
+         ...restUserData,
+      });
+
+      await userToUpdate.save();
+
+      res.status(200).json({
+         success: true,
+         message: "User updated successfully",
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error updating user",
+         error: error.message,
+      });
+   }
+};
+
+userController.getUserLoans = async (req, res) => {
+   try {
+      const userId = req.tokenData.userId;
+
+      const user = await User.findByPk(userId, {
+         include: [
+            {
+               model: Loan,
+               as: "loans",
+               include: [
+                  {
+                     model: Book,
+                     as: "book",
+                     attributes: {
+                        exclude: ["createdAt", "updatedAt"],
+                     },
+                  },
+               ],
+               attributes: {
+                  exclude: ["createdAt", "updatedAt", "user_id", "book_id"],
+               },
+            },
+         ],
+      });
+
+      // Ver todas las propiedades y metodos del objeto, incluido los metodos especiales
+      console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(user)));
+
+      if (user.loans.length === 0)
+         return res.status(404).json({
+            success: true,
+            message: "No loans found for this user",
+         });
+
+      res.status(200).json({
+         success: true,
+         message: "User loans retrieved successfully",
+         data: user.loans,
+      });
+   } catch (error) {
+      res.status(500).json({
+         success: false,
+         message: "Error retrieving user's loan",
          error: error.message,
       });
    }

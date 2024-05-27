@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const ctrl = require("../controllers/userController");
+const auth = require("../middlewares/auth");
 
 // User routes
-// router.get("/profile", ctrl.getUserProfile);
-// router.put("/profile", ctrl.updateUserProfile);
-router.get("/favorite_books", ctrl.getUserFavoriteBooks);
-router.post("/favorite_books", ctrl.addFavoriteBookToUser);
-router.delete("/favorite_books/:bookId", ctrl.removeFavoriteBookFromUser);
-// router.get("/loans", ctrl.getUserLoans);
+router.get("/profile", auth, ctrl.getUserProfile);
+router.put("/profile", auth, ctrl.updateUserProfile);
+router.get("/favorite_books", auth, ctrl.getUserFavoriteBooks);
+router.post("/favorite_books", auth, ctrl.addFavoriteBookToUser);
+router.delete("/favorite_books/:bookId", auth, ctrl.removeFavoriteBookFromUser);
+router.get("/loans", auth, ctrl.getUserLoans);
 
 // Protected routes
 router.get("/", ctrl.getAll);
