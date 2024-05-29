@@ -13,10 +13,15 @@ router.delete("/favorite_books/:bookId", auth, ctrl.removeFavoriteBookFromUser);
 router.get("/loans", auth, ctrl.getUserLoans);
 
 // Protected routes
-router.get("/", auth, authorize("manager"), ctrl.getAll);
-router.get("/:id", auth, ctrl.getById);
-router.put("/:id", auth, ctrl.update);
-router.delete("/:id", auth, ctrl.delete);
-router.get("/:id/loans", auth, ctrl.getLoansByUserId);
+router.get("/", auth, authorize("admin"), ctrl.getAll);
+router.get("/:id", auth, authorize("admin"), ctrl.getById);
+router.put("/:id", auth, authorize("admin"), ctrl.update);
+router.delete("/:id", authorize("admin"), auth, ctrl.delete);
+router.get(
+   "/:id/loans",
+   auth,
+   authorize("admin", "manager"),
+   ctrl.getLoansByUserId
+);
 
 module.exports = router;
