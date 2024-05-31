@@ -1,6 +1,7 @@
 const { User, Role } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { emailValidator } = require("../helpers/validators");
 
 const authController = {};
 
@@ -8,7 +9,7 @@ authController.register = async (req, res) => {
    try {
       const { first_name, email, password } = req.body;
 
-      if (!first_name || !email || !password) {
+      if (!first_name || !emailValidator || !password) {
          return res.status(400).json({
             success: true,
             message: "Invalid registration fields",
