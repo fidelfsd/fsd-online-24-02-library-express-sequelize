@@ -3,6 +3,8 @@ const emailValidator = (email) => {
    return pattern.test(email);
 };
 
+
+
 module.exports = {
    emailValidator,
 };

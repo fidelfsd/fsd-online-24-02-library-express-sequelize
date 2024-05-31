@@ -9,7 +9,7 @@ authController.register = async (req, res) => {
    try {
       const { first_name, email, password } = req.body;
 
-      if (!first_name || !emailValidator || !password) {
+      if (!first_name || !emailValidator(email) || !password) {
          return res.status(400).json({
             success: true,
             message: "Invalid registration fields",

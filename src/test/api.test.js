@@ -72,6 +72,22 @@ describe("User Registration", () => {
       expect(status).toBe(500);
       expect(body.success).toBe(false);
    });
+
+   test("should not register user with invalid email", async () => {
+      const response = await request(server)
+         .post("/api/auth/register")
+         .send({
+            first_name: "TestUser3",
+            email: "testuser.com",
+            password: "12345",
+         })
+         .set("Accept", "application/json");
+
+      const { status, body } = response;
+
+      expect(status).toBe(400);
+      expect(body.success).toBe(true);
+   });
 });
 
 describe("User Authentication", () => {
