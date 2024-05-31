@@ -4,10 +4,23 @@ const db = require("../database/db");
 
 let server;
 let userId;
+let userToken;
+let adminToken;
 
 beforeAll(async () => {
    await db.authenticate();
    server = app.listen(4000);
+
+   // Obtain admin token
+   const adminLoginResponse = await request(server)
+      .post("/api/auth/login")
+      .send({
+         email: "admin@example.com",
+         password: "12345678",
+      })
+      .set("Accept", "application/json");
+
+   adminToken = adminLoginResponse.body.token;
 });
 
 afterAll(async () => {
@@ -61,24 +74,57 @@ describe("User Registration", () => {
    });
 });
 
-
 describe("User Authentication", () => {
-   test("should login an existing user", async() => {
-      const response = await request(server).post()
-   })
-})
+   test("should login an existing user", async () => {
+      const response = await request(server)
+         .post("/api/auth/login")
+         .send({
+            email: "test@user.com",
+            password: "12345",
+         })
+         .set("Accept", "application/json");
 
+      const { status, body } = response;
+
+      expect(status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(typeof body.token).toEqual("string");
+
+      userToken = body.token;
+   });
+});
 
 describe("User Profile Management", () => {
-   test("should delete an authenticated user", async () => {
+   test("should retreive user profile for authenticated user", async () => {
+      const response = await request(server)
+         .get("/api/users/profile")
+         .set("Authorization", `Bearer ${userToken}`)
+         .set("Accept", "application/json");
+
+      const { status, body } = response;
+      expect(status).toBe(200);
+      expect(body.success).toBe(true);
+      expect(body.data).toBeDefined();
+   });
+
+   test("should not delete a user without admin token", async () => {
       const response = await request(server)
          .delete(`/api/users/${userId}`)
-         .set("Accept", "application/json");
+         .set("Accept", "application/json")
+         .set("Authorization", `Bearer ${userToken}`);
+
+      const { status } = response;
+      expect(status).toBe(403);
+   });
+
+   test("should delete an authenticated user by admin", async () => {
+      const response = await request(server)
+         .delete(`/api/users/${userId}`)
+         .set("Accept", "application/json")
+         .set("Authorization", `Bearer ${adminToken}`);
 
       const { status, body } = response;
       expect(status).toBe(200);
       expect(body.success).toBe(true);
    });
 });
-
-

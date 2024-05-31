@@ -18,7 +18,7 @@ module.exports = (...allowedRoles) => {
       // If nome of the condition are met, reject the request
       res.status(403).json({
          success: true,
-         message: "Unauthorized access",
+         message: "Forbidden access",
       });
    };
 };
