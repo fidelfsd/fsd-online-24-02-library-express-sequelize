@@ -17,7 +17,7 @@ authController.register = async (req, res) => {
 
       const hashedPassword = bcrypt.hashSync(password, 10);
 
-      await User.create({
+      const user = await User.create({
          first_name,
          email,
          password: hashedPassword,
@@ -27,6 +27,7 @@ authController.register = async (req, res) => {
       res.status(200).json({
          success: true,
          message: `User registered successfully`,
+         data: { userId: user.id },
       });
    } catch (error) {
       res.status(500).json({

@@ -16,7 +16,7 @@ router.get("/loans", auth, ctrl.getUserLoans);
 router.get("/", auth, authorize("admin"), ctrl.getAll);
 router.get("/:id", auth, authorize("admin"), ctrl.getById);
 router.put("/:id", auth, authorize("admin"), ctrl.update);
-router.delete("/:id", authorize("admin"), auth, ctrl.delete);
+router.delete("/:id", ctrl.delete);
 router.get(
    "/:id/loans",
    auth,
