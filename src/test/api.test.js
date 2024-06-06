@@ -2,17 +2,15 @@ const request = require("supertest");
 const app = require("../app");
 const db = require("../database/db");
 
-let server;
 let userId;
 let userToken;
 let adminToken;
 
 beforeAll(async () => {
    await db.authenticate();
-   server = app.listen(4000);
 
    // Obtain admin token
-   const adminLoginResponse = await request(server)
+   const adminLoginResponse = await request(app)
       .post("/api/auth/login")
       .send({
          email: "admin@example.com",
@@ -24,13 +22,12 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-   if (server) server.close();
    await db.close();
 });
 
 describe("API Health Check", () => {
    test("should return healthy status", async () => {
-      const response = await request(server).get("/api/healthy");
+      const response = await request(app).get("/api/healthy");
 
       const status = response.status;
 
@@ -40,7 +37,7 @@ describe("API Health Check", () => {
 
 describe("User Registration", () => {
    test("should register a new user", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .post("/api/auth/register")
          .send({
             first_name: "TestUser",
@@ -58,7 +55,7 @@ describe("User Registration", () => {
    });
 
    test("should not allow duplicate email registration", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .post("/api/auth/register")
          .send({
             first_name: "TestUser2",
@@ -74,7 +71,7 @@ describe("User Registration", () => {
    });
 
    test("should not register user with invalid email", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .post("/api/auth/register")
          .send({
             first_name: "TestUser3",
@@ -92,7 +89,7 @@ describe("User Registration", () => {
 
 describe("User Authentication", () => {
    test("should login an existing user", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .post("/api/auth/login")
          .send({
             email: "test@user.com",
@@ -112,7 +109,7 @@ describe("User Authentication", () => {
 
 describe("User Profile Management", () => {
    test("should retreive user profile for authenticated user", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .get("/api/users/profile")
          .set("Authorization", `Bearer ${userToken}`)
          .set("Accept", "application/json");
@@ -124,7 +121,7 @@ describe("User Profile Management", () => {
    });
 
    test("should not delete a user without admin token", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .delete(`/api/users/${userId}`)
          .set("Accept", "application/json")
          .set("Authorization", `Bearer ${userToken}`);
@@ -134,7 +131,7 @@ describe("User Profile Management", () => {
    });
 
    test("should delete an authenticated user by admin", async () => {
-      const response = await request(server)
+      const response = await request(app)
          .delete(`/api/users/${userId}`)
          .set("Accept", "application/json")
          .set("Authorization", `Bearer ${adminToken}`);
